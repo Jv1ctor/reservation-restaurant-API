@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurants {
+  id              String   @id @default(uuid()) @db.VarChar
+  name_restaurant String   @db.VarChar
+  opening_hours   String   @db.VarChar
+  max_capacity    Int      @db.Integer
+  images          String[] @default(["none", "none", "none"]) @db.VarChar
+  // localization  Int  
+  user_id         String   @unique @db.VarChar
+  users           Users    @relation(fields: [user_id], references: [id])
+  table           Tables[]
+
+  @@map("restaurants")
+}
+
+model Tables {
+  id            String         @id @default(uuid()) @db.VarChar
+  number_table  Int            @db.Integer
+  capacity      Int            @db.Integer
+  status        String         @default("ready") @db.VarChar
+  description   String         @db.VarChar()
+  restaurant_id String         @db.VarChar
+  restaurants   Restaurants    @relation(fields: [restaurant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reservations  Reservations[]
+
+  @@map("tables")
+}
+
+model Users {
+  id           String         @id @default(uuid()) @db.VarChar
+  first_name   String         @db.VarChar
+  last_name    String         @db.VarChar
+  email        String         @unique @db.VarChar
+  password     String         @db.VarChar
+  reservations Reservations[]
+  restaurants  Restaurants?
+
+  @@map("users")
+}
+
+model Reservations {
+  id               String   @id @default(uuid()) @db.VarChar
+  number_people    Int      @db.Integer
+  status           String   @default("pending") @db.VarChar
+  date_reservation DateTime @db.Timestamp
+  date_coming      String   @db.VarChar
+  observation      String   @db.VarChar
+  user_id          String   @db.VarChar
+  table_id         String   @db.VarChar()
+  users            Users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tables           Tables   @relation(fields: [table_id], references: [id])
+
+  @@map("reservations")
+}
