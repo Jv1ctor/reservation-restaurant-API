@@ -1,7 +1,12 @@
 import z from "zod"
 
+type ValidatorDataError = {
+  code: string,
+  message: string
+}
+
 class ValidatorData {
-  private getMessage = (error: z.ZodError) => {
+  private getMessage = (error: z.ZodError): ValidatorDataError => {
     const errors = error.errors[0]
     return { code: errors.code, message: errors.message }
   }
