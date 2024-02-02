@@ -9,7 +9,7 @@ class ErrorMiddleware {
   handleErrorMiddleware = (err: ApiErrorType, _req: Request , res: Response, next: NextFunction) => {
     const statusCode = err.statusCode ?? 500
     const codeError = err.codeError 
-    const nameError = err.name ? err.name : "INTERNAL_ERROR"
+    const nameError = err.name_error ? err.name_error : "INTERNAL_ERROR"
     const messageError = err.statusCode ? err.message : "Internal Error Server"
 
     if(codeError){

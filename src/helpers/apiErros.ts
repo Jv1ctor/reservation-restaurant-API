@@ -1,5 +1,12 @@
 export type ApiErrorType = Error & {
   statusCode?: number
+  name_error?: string
+  codeError?: string
+}
+
+type ParamErrorType = {
+  name_error: string,
+  message: string,
   codeError?: string
 }
 
@@ -21,20 +28,20 @@ class ApiError extends Error {
 }
 
 class BadRequestError extends ApiError {
-  constructor({ name, message, codeError }: ApiErrorType) {
-    super(name, message, 400, codeError)
+  constructor({ name_error, message, codeError }: ParamErrorType) {
+    super(name_error, message, 400, codeError)
   }
 }
 
 class UnauthorizedError extends ApiError {
-  constructor({ name, message }: ApiErrorType) {
-    super(name, message, 401)
+  constructor({ name_error, message }: ParamErrorType) {
+    super(name_error, message, 401)
   }
 }
 
 class ForbiddenError extends ApiError {
-  constructor({ name, message }: ApiErrorType) {
-    super(name, message, 403)
+  constructor({ name_error, message }: ParamErrorType) {
+    super(name_error, message, 403)
   }
 }
 
