@@ -13,23 +13,28 @@ type RefreshTokenType = {
 }
 
 interface iAuthToken {
-  generateToken: (userId: string, nameUser?: string) => Promise<string>
+  generateToken: (
+    userId: string,
+    nameUser?: string
+  ) => Promise<{ id: string; token: string, exToken?: number }>
   validToken: (token: string) => Promise<RefreshTokenType | undefined>
 }
 
 class RefreshToken implements iAuthToken {
+  token_id: string = randomUUID()
+  expiresIn: string = process.env.EXPIRES_IN_RFTOKEN as string
   public generateToken = async (userId: string, nameUser?: string) => {
-    const token = jwtAsync.signTokenAsync(
+    const {token, exp} = await jwtAsync.signTokenAsync(
       { name: nameUser },
       process.env.SECRET_KEY_JWT as string,
       {
         subject: userId,
-        jwtid: randomUUID(),
-        expiresIn: process.env.EXPIRES_IN_RFTOKEN,
+        jwtid: this.token_id,
+        expiresIn: this.expiresIn,
       }
     )
 
-    return token
+    return { id: this.token_id, token, exToken: exp }
   }
 
   public validToken = async (token: string) => {

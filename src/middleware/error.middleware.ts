@@ -9,14 +9,13 @@ class ErrorMiddleware {
   handleErrorMiddleware = (err: ApiErrorType, _req: Request , res: Response, next: NextFunction) => {
     const statusCode = err.statusCode ?? 500
     const codeError = err.codeError 
-    const nameError = err.name_error ? err.name_error : "INTERNAL_ERROR"
     const messageError = err.statusCode ? err.message : "Internal Error Server"
 
     if(codeError){
-      res.status(statusCode).json({ name_error: nameError, code_error: codeError,  error: messageError})
+      res.status(statusCode).json({ code_error: codeError,  error: messageError})
       return
     }
-    res.status(statusCode).json({ name_error: nameError, error: messageError })
+    res.status(statusCode).json({ error: messageError })
   }
 }
 

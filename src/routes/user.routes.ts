@@ -6,7 +6,7 @@ const userController = new UserController()
 
 router.post("/login", userController.login)
 router.post("/register", userController.register)
-router.post("/refresh-token")
+router.post("/refresh-token", userController.refreshToken)
 
 
 
