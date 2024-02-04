@@ -21,8 +21,8 @@ interface iAuthToken {
 }
 
 class RefreshToken implements iAuthToken {
-  token_id: string = randomUUID()
-  expiresIn: string = process.env.EXPIRES_IN_RFTOKEN as string
+  private token_id: string = randomUUID()
+  private expiresIn: string = process.env.EXPIRES_IN_RFTOKEN as string
   public generateToken = async (userId: string, nameUser?: string) => {
     const {token, exp} = await jwtAsync.signTokenAsync(
       { name: nameUser },
