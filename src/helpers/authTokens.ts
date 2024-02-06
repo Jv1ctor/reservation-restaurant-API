@@ -9,19 +9,30 @@ class AuthToken {
   protected jwt_secret: string = process.env.SECRET_KEY_JWT as string
 }
 
+<<<<<<< HEAD
 class RefreshToken extends AuthToken {
   public generateToken = async (userId: string, nameUser?: string) => {
     const { token, exp } = await jwtAsync.signTokenAsync(
+=======
+interface iAuthToken {
+  generateToken: (userId: string, nameUser?: string) => Promise<string>
+  validToken: (token: string) => Promise<RefreshTokenType | undefined>
+}
+
+class RefreshToken implements iAuthToken {
+  public generateToken = async (userId: string, nameUser?: string) => {
+    const token = jwtAsync.signTokenAsync(
+>>>>>>> parent of e94f16c (integração com o redis para armazenamento do refresh token  e criação da rota de login)
       { name: nameUser },
       this.jwt_secret,
       {
         subject: userId,
-        jwtid: this.token_id,
-        expiresIn: this.expiresIn,
+        jwtid: randomUUID(),
+        expiresIn: process.env.EXPIRES_IN_RFTOKEN,
       }
     )
 
-    return { id: this.token_id, token, exToken: exp }
+    return token
   }
 
   public validToken = async (token: string) => {

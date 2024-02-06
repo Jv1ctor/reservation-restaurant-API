@@ -6,13 +6,11 @@ class JWTAsync {
     secretOrPrivateKey: JWT.Secret,
     options: JWT.SignOptions
   ) => {
-    return new Promise((resolver: (value: { token: string, exp?: number}) => void, reject) => {
+    return new Promise((resolver: (value: string) => void, reject) => {
       JWT.sign(payload, secretOrPrivateKey, options, (err, encoded) => {
         if (err) return reject(err)
-        if (encoded) {
-          const { exp } = JWT.decode(encoded) as JwtPayload
-          resolver({ token: encoded, exp: exp })
-        }
+
+        if (encoded) resolver(encoded)
       })
     })
   }
