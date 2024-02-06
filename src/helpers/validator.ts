@@ -11,7 +11,7 @@ class ValidatorData {
     return { code: errors.code, message: errors.message }
   }
 
-  public async handle<T extends z.ZodRawShape>(schema: z.ZodObject<T>, obj: object) {
+  public async handle<T extends z.ZodRawShape>(schema: z.ZodObject<T>, obj: object ) {
     const schemaParse = await schema.safeParseAsync(obj)
     if (schemaParse.success) {
       return { data: schemaParse.data }

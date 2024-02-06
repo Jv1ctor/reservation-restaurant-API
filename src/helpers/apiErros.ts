@@ -29,8 +29,8 @@ class BadRequestError extends ApiError {
 }
 
 class UnauthorizedError extends ApiError {
-  constructor({ message }: ParamErrorType) {
-    super(message, 401)
+  constructor({ message, codeError}: ParamErrorType) {
+    super(message, 401, codeError)
   }
 }
 

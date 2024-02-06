@@ -21,7 +21,7 @@ class JWTAsync {
       JWT.verify(token, secretOrPublicKey, (err, decoded) => {
         if (err) return reject(err)
 
-        if (decoded) resolver(decoded as JwtPayload)
+        if (decoded) resolver(decoded as JwtPayload )
       })
     })
   }

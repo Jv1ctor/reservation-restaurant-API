@@ -43,6 +43,7 @@ model Users {
   last_name    String         @db.VarChar
   email        String         @unique @db.VarChar
   password     String         @db.VarChar
+  role         String         @default("regular") @db.VarChar
   reservations Reservations[]
   restaurants  Restaurants?
 
