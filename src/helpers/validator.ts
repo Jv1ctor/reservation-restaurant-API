@@ -16,6 +16,7 @@ class ValidatorData {
     if (schemaParse.success) {
       return { data: schemaParse.data }
     }
+     
     return { error: this.getMessage(schemaParse.error) }
   }
 }

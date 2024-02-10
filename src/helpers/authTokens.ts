@@ -1,93 +1,65 @@
-import jwtAsync from "./jwt-async"
-import { randomUUID } from "crypto"
-// informações para o refreshToken |-> userId, rfTokenId, nameUser
-// informações accessToken |-> rfTokenId, accessID, permissoes
+import JWTAsync from "./jwt-async"
 
-class AuthToken {
-  protected token_id: string = randomUUID()
-  protected expiresIn: string = process.env.EXPIRES_IN_RFTOKEN as string
-  protected jwt_secret: string = process.env.SECRET_KEY_JWT as string
+type JWTPayloadType = {
+  admin?: boolean
+  email?: string
 }
 
-<<<<<<< HEAD
-class RefreshToken extends AuthToken {
-  public generateToken = async (userId: string, nameUser?: string) => {
-    const { token, exp } = await jwtAsync.signTokenAsync(
-=======
-interface iAuthToken {
-  generateToken: (userId: string, nameUser?: string) => Promise<string>
-  validToken: (token: string) => Promise<RefreshTokenType | undefined>
+type returnVerifyToken = {
+  success: boolean
+  userId?: string
+  admin?: boolean
+  email?: string
+  error?: Error | unknown
+}
+interface IAuthToken {
+  generateToken: (
+    userId: string,
+    expiresIn: string,
+    payload?: JWTPayloadType
+  ) => Promise<string>
+  verifyToken: (token: string) => Promise<returnVerifyToken>
 }
 
-class RefreshToken implements iAuthToken {
-  public generateToken = async (userId: string, nameUser?: string) => {
-    const token = jwtAsync.signTokenAsync(
->>>>>>> parent of e94f16c (integração com o redis para armazenamento do refresh token  e criação da rota de login)
-      { name: nameUser },
-      this.jwt_secret,
-      {
-        subject: userId,
-        jwtid: randomUUID(),
-        expiresIn: process.env.EXPIRES_IN_RFTOKEN,
-      }
-    )
+class AuthToken implements IAuthToken {
+  private readonly secretJWT = process.env.SECRET_KEY_JWT as string
+  private readonly issJWT = process.env.ISS_JWT as string
+
+  public generateToken = (
+    userId: string,
+    expiresIn: string,
+    payload?: JWTPayloadType
+  ) => {
+    const token = JWTAsync.signTokenAsync(payload || {}, this.secretJWT, {
+      expiresIn: expiresIn,
+      subject: userId,
+      issuer: this.issJWT,
+    })
 
     return token
   }
 
-  public validToken = async (token: string) => {
+  public verifyToken = async (token: string) => {
     try {
-      const decoded = await jwtAsync.verifyTokenAsync(
+      const decoded = await JWTAsync.verifyTokenAsync<JWTPayloadType>(
         token,
-        process.env.SECRET_KEY_JWT as string
+        this.secretJWT
       )
 
-      if (decoded.sub && decoded.exp && decoded.jti) {
+      if ("admin" in decoded && "email" in decoded) {
         return {
-          id: decoded.jti,
+          success: true,
+          tokenType: "ACCESS_TOKEN",
           userId: decoded.sub,
-          exp: decoded.exp,
+          admin: decoded.admin,
+          email: decoded.email,
         }
       }
-    } catch (error) {}
+      return { success: true, tokenType: "REFRESH_TOKEN", userId: decoded.sub }
+    } catch (error) {
+      return { success: false, error: error as Error }
+    }
   }
 }
 
-class AccessToken extends AuthToken {
-  public generateToken = async (
-    refreshTokenId: string,
-    nameUser: string,
-    role?: string
-  ) => {
-    const { token } = await jwtAsync.signTokenAsync(
-      { name: nameUser, role: role },
-      this.jwt_secret,
-      {
-        expiresIn: this.expiresIn,
-        subject: refreshTokenId,
-      }
-    )
-
-    return { token }
-  }
-
-  public validToken = async (token: string) => {
-    try {
-      const decoded = await jwtAsync.verifyTokenAsync(
-        token,
-        process.env.SECRET_KEY_JWT as string
-      )
-
-      if (decoded.sub && decoded.exp) {
-        return {
-          refreshTokenId: decoded.sub,
-          exp: decoded.exp,
-        }
-      }
-    } catch (error) {}
-  }
-}
-
-const refreshToken = new RefreshToken()
-const accessToken = new AccessToken()
-export { refreshToken, accessToken }
+export default new AuthToken()

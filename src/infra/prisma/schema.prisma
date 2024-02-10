@@ -44,6 +44,7 @@ model Users {
   email        String         @unique @db.VarChar
   password     String         @db.VarChar
   role         String         @default("regular") @db.VarChar
+  logged       Boolean        @default(false)
   reservations Reservations[]
   restaurants  Restaurants?
 

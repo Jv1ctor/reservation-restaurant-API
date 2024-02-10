@@ -14,12 +14,12 @@ class JWTAsync {
       })
     })
   }
-  verifyTokenAsync = (token: string, secretOrPublicKey: JWT.Secret) => {
-    return new Promise((resolver: (value: JwtPayload) => void, reject) => {
+  verifyTokenAsync = <T>(token: string, secretOrPublicKey: JWT.Secret) => {
+    return new Promise((resolver: (value: JwtPayload & T) => void, reject) => {
       JWT.verify(token, secretOrPublicKey, (err, decoded) => {
         if (err) return reject(err)
 
-        if (decoded) resolver(decoded as JwtPayload )
+        if (decoded) resolver(decoded as JwtPayload & T )
       })
     })
   }
