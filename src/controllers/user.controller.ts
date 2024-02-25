@@ -12,7 +12,7 @@ export class UserController {
       next(
         new BadRequestError({
           message: loginService.error.message,
-          codeError: loginService.error.codeError,
+          codeError: loginService.error.code,
         })
       )
       return
@@ -35,7 +35,7 @@ export class UserController {
       next(
         new BadRequestError({
           message: registerService.error.message,
-          codeError: registerService.error.codeError,
+          codeError: registerService.error.code,
         })
       )
       return
@@ -58,7 +58,7 @@ export class UserController {
         next(
           new UnauthorizedError({
             message: refreshTokenService.error.message,
-            codeError: refreshTokenService.error.codeError,
+            codeError: refreshTokenService.error.code,
           })
         )
         return

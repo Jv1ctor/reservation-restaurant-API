@@ -3,7 +3,7 @@ export type ApiErrorType = Error & {
   codeError?: string
 }
 
-export type ParamErrorType = {
+type ParamErrorType = {
   message: string,
   codeError?: string
 }

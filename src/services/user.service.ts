@@ -3,7 +3,8 @@ import z from "zod"
 import prisma from "../infra/database/prisma.db"
 import { validator } from "../helpers/validator"
 import authTokens from "../helpers/authTokens"
-import serviceErros, { EnumErrosService, returnServiceError } from "../helpers/serviceErros"
+import serviceErros, { returnServiceError } from "../helpers/serviceErros"
+import { logger } from "../infra/logger"
 
 
 const schemaRegisterData = z.object({
@@ -40,23 +41,12 @@ interface IUserService {
 }
 
 class UserService implements IUserService{
-  private invalidDataError = serviceErros.handleError(
-    EnumErrosService.INVALID_DATA
-  )
-  private existUserError = serviceErros.handleError(EnumErrosService.EXIST_USER)
-  private unknowError = serviceErros.handleError(EnumErrosService.UNKNOW_ERROR)
-  private credencialsError = serviceErros.handleError(
-    EnumErrosService.CREDENCIALS_ERROR
-  )
-  private invalidTokenError = serviceErros.handleError(
-    EnumErrosService.INVALID_TOKEN
-  )
-
   register = async (body: any) => {
     try {
       const { data, error } = await validator.handle(schemaRegisterData, body)
 
-      if (error) return this.invalidDataError(error)
+      logger.debug(error)
+      if (error) return serviceErros.invalidDataError(error)
 
       const isExistUser = await prisma.users.findUnique({
         where: { email: data.email },
@@ -64,9 +54,9 @@ class UserService implements IUserService{
       })
 
       if (isExistUser) {
-        return this.existUserError({
+        return serviceErros.existUserError({
           message: "User already exists",
-          codeError: "exist_user",
+          code: "exist_user",
         })
       }
 
@@ -84,7 +74,7 @@ class UserService implements IUserService{
 
       return { success: true as const }
     } catch (error) {
-      return this.unknowError(error as Error)
+      return serviceErros.unknowError(error as Error)
     }
   }
 
@@ -92,7 +82,7 @@ class UserService implements IUserService{
     try {
       const { data, error } = await validator.handle(schemaLoginData, body)
 
-      if (error) return this.invalidDataError(error)
+      if (error) return serviceErros.invalidDataError(error)
 
       const user = await prisma.users.findUnique({
         where: { email: data.email },
@@ -108,8 +98,8 @@ class UserService implements IUserService{
         user && (await bcrypt.compare(data.password, user?.password))
 
       if (!validatorPass) {
-        return this.credencialsError({
-          codeError: "invalid_credencials",
+        return serviceErros.credencialsError({
+          code: "invalid_credencials",
           message: "invalid credencials",
         })
       }
@@ -140,7 +130,7 @@ class UserService implements IUserService{
         accessToken,
       }
     } catch (error) {
-      return this.unknowError(error as Error)
+      return serviceErros.unknowError(error as Error)
     }
   }
 
@@ -176,12 +166,12 @@ class UserService implements IUserService{
         }
       }
 
-      return this.invalidTokenError({
-        codeError: "invalid_token",
+      return serviceErros.invalidTokenError({
+        code: "invalid_token",
         message: "invalid token",
       })
     } catch (error) {
-      return this.unknowError(error as Error)
+      return serviceErros.unknowError(error as Error)
     }
   }
 }

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express"
 import authTokens from "../helpers/authTokens"
 import prisma from "../infra/database/prisma.db"
 import { UnauthorizedError } from "../helpers/apiErros"
+import { logger } from "../infra/logger"
 
 class Auth {
   private validatorAuth = (auth?: string) => {
@@ -28,18 +29,30 @@ class Auth {
       if (decoded.success && decoded.tokenType === "ACCESS_TOKEN") {
         const user = await prisma.users.findUnique({
           where: { id: decoded.userId, AND: { email: decoded.email } },
-          select: { logged: true },
+          select: {
+            logged: true,
+            email: true,
+            first_name: true,
+            last_name: true,
+            id: true,
+            role: true,
+          },
         })
-
-        if (user && user.logged) next()
         
+        if (user && user.logged) {
+          req.user = user
+          next()
+          return
+        }
       }
     }
 
-    return next( new UnauthorizedError({
-      codeError: "invalid_token",
-      message: "invalid token"
-    }))
+    return next(
+      new UnauthorizedError({
+        codeError: "invalid_token",
+        message: "invalid token",
+      })
+    )
   }
 
   public authorization = async () => {}

@@ -11,28 +11,46 @@ datasource db {
 }
 
 model Restaurants {
-  id              String   @id @default(uuid()) @db.VarChar
-  name_restaurant String   @db.VarChar
-  opening_hours   String   @db.VarChar
-  max_capacity    Int      @db.Integer
-  images          String[] @default(["none", "none", "none"]) @db.VarChar
-  // localization  Int  
-  user_id         String   @unique @db.VarChar
-  users           Users    @relation(fields: [user_id], references: [id])
+  id              String      @id @default(uuid()) @db.VarChar
+  name_restaurant String      @db.VarChar
+  address         String      @db.VarChar
+  tel             String      @db.VarChar
+  description     String      @db.VarChar
+  kitchen         String      @db.VarChar
+  minimun_price   Decimal     @db.Money
+  maximum_price   Decimal     @db.Money
+  localization    String      @default("none") @db.VarChar
+  created_at      DateTime    @default(now()) @db.Timestamp()
+  updated_at      DateTime    @default(now()) @db.Timestamp()
+  user_id         String      @unique @db.VarChar
+  users           Users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   table           Tables[]
+  timetable       Timetable[]
 
   @@map("restaurants")
 }
 
+model Timetable {
+  id            String      @id @default(uuid()) @db.VarChar
+  weekday       String      @db.VarChar
+  opening_hours DateTime    @db.Time()
+  closing_hours DateTime    @db.Time()
+  restaurant_id String      @db.VarChar
+  restaurants   Restaurants @relation(fields: [restaurant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("timetable")
+}
+
 model Tables {
-  id            String         @id @default(uuid()) @db.VarChar
-  number_table  Int            @db.Integer
-  capacity      Int            @db.Integer
-  status        String         @default("ready") @db.VarChar
-  description   String         @db.VarChar()
-  restaurant_id String         @db.VarChar
-  restaurants   Restaurants    @relation(fields: [restaurant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  reservations  Reservations[]
+  id             String       @id @default(uuid()) @db.VarChar
+  number_table   Int          @db.Integer
+  capacity       Int          @db.Integer
+  status         String       @default("ready") @db.VarChar
+  description    String       @db.VarChar()
+  restaurant_id  String       @db.VarChar
+  reservation_id String       @unique @db.VarChar
+  restaurants    Restaurants  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reservations   Reservations @relation(fields: [reservation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("tables")
 }
@@ -59,9 +77,8 @@ model Reservations {
   date_coming      String   @db.VarChar
   observation      String   @db.VarChar
   user_id          String   @db.VarChar
-  table_id         String   @db.VarChar()
+  tables           Tables?
   users            Users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  tables           Tables   @relation(fields: [table_id], references: [id])
 
   @@map("reservations")
 }
